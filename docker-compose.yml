@@ -1,0 +1,192 @@
+services:
+  # === BASES DE DATOS ===
+  mariadb:
+    labels:
+      com.docker.compose.service: "mariadb"
+    image: mariadb:11.4
+    container_name: sales-mariadb
+    restart: unless-stopped
+    networks:
+      - app-network
+    environment:
+      MARIADB_DATABASE: salesdb
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_USER: sales_user
+      MARIADB_PASSWORD: sales_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./sales-service/docker/mariadb/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-accountable:
+    labels:
+      com.docker.compose.service: "postgres-accountable"
+    image: postgres:16-alpine
+    container_name: accountable-postgres
+    networks:
+      - app-network
+    environment:
+      POSTGRES_DB: accountable_db
+      POSTGRES_USER: accountable_user
+      POSTGRES_PASSWORD: accountable_pass
+    ports:
+      - "5436:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U accountable_user -d accountable_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_accountable_data:/var/lib/postgresql/data
+      - ./accountable-service/docker/postgres/init/01-init-accountable.sql:/docker-entrypoint-initdb.d/01-init-accountable.sql:ro
+
+  postgres-kpis:
+    labels:
+      com.docker.compose.service: "postgres-kpis"
+    image: postgres:16-alpine
+    container_name: kpis-postgres
+    restart: unless-stopped
+    networks:
+      - app-network
+    environment:
+      POSTGRES_DB: kpisdb
+      POSTGRES_USER: kpis_user
+      POSTGRES_PASSWORD: kpis_pass
+    ports:
+      - "6432:5432"
+    volumes:
+      - postgres_kpis_data:/var/lib/postgresql/data
+      - ./kpis-microservice/docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kpis_user -d kpisdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # === MICROSERVICIOS ===
+  sales-service:
+    labels:
+      com.docker.compose.service: "sales-service"
+    build:
+      context: ./sales-service
+      dockerfile: Dockerfile
+    container_name: sales-service
+    restart: unless-stopped
+    networks:
+      - app-network
+    ports:
+      - "9096:9096"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/salesdb
+      SPRING_DATASOURCE_USERNAME: sales_user
+      SPRING_DATASOURCE_PASSWORD: sales_password
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  accountable-service:
+    labels:
+      com.docker.compose.service: "accountable-service"
+    build:
+      context: ./accountable-service
+      dockerfile: Dockerfile
+    container_name: accountable-service
+    restart: unless-stopped
+    networks:
+      - app-network
+    ports:
+      - "9095:9095"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-accountable:5432/accountable_db
+      SPRING_DATASOURCE_USERNAME: accountable_user
+      SPRING_DATASOURCE_PASSWORD: accountable_pass
+    depends_on:
+      postgres-accountable:
+        condition: service_healthy
+
+
+  kpis-microservice:
+    labels:
+      com.docker.compose.service: "kpis-microservice"
+    build:
+      context: ./kpis-microservice
+      dockerfile: Dockerfile
+    container_name: kpis-microservice
+    restart: unless-stopped
+    networks:
+      - app-network
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-kpis:5432/kpisdb
+      SPRING_DATASOURCE_USERNAME: kpis_user
+      SPRING_DATASOURCE_PASSWORD: kpis_pass
+      LOGSTASH_HOST: logstash
+    depends_on:
+      postgres-kpis:
+        condition: service_healthy
+
+  # === OBSERVABILIDAD (ELK) ===
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch
+    networks:
+      - app-network
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    container_name: logstash
+    networks:
+      - app-network
+    ports:
+      - "5000:5000"
+      - "5044:5044"
+      - "9600:9600"
+    volumes:
+      - ./observability/logstash/pipeline:/usr/share/logstash/pipeline
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: kibana
+    networks:
+      - app-network
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - csp.strict=false
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+  postgres_accountable_data:
+  postgres_kpis_data:
+  elasticsearch_data:

@@ -1,0 +1,23 @@
+meta {
+  name: kpis
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/kpis
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "user":"usuario01@demo.local",
+    "area":"OPERATIONS"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

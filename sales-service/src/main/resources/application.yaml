@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: sales-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mariadb://localhost:3306/salesdb}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:root}
+    driver-class-name: org.mariadb.jdbc.Driver
+  sql:
+    init:
+      mode: never
+
+server:
+  port: 9096

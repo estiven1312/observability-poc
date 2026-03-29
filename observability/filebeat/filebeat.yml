@@ -1,0 +1,42 @@
+filebeat.inputs:
+  - type: container
+    paths:
+      - /var/lib/docker/containers/*/*.log
+    # Excluir contenedores de infraestructura ELK
+    processors:
+      - drop_event:
+          when:
+            or:
+              - contains:
+                  container.image.name: "filebeat"
+              - contains:
+                  container.image.name: "logstash"
+              - contains:
+                  container.image.name: "elasticsearch"
+              - contains:
+                  container.image.name: "kibana"
+
+processors:
+  - add_docker_metadata:
+      host: "unix:///var/run/docker.sock"
+      match_source: true
+      match_source_index: 6
+  - decode_json_fields:
+      fields: ["message"]
+      target: "json"
+      overwrite_keys: true
+      max_depth: 1
+      when:
+        not:
+          or:
+            - contains:
+                message: "filebeat"
+            - contains:
+                message: "logstash"
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+logging.level: info   # bajar de debug a info para reducir ruido
+logging.json: true
+logging.metrics.enabled: false

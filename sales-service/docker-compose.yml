@@ -1,0 +1,25 @@
+services:
+  mariadb:
+    labels:
+      com.docker.compose.service: "sales-service"
+    image: mariadb:11.4
+    container_name: sales-service-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: salesdb
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_USER: sales_user
+      MARIADB_PASSWORD: sales_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./docker/mariadb/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mariadb_data:

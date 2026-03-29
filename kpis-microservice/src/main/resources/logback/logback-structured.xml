@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty name="springAppName" source="spring.application.name"/>
+    <!-- Configuración de appenders -->
+    <!-- Este apender envía los logs en formato JSON a la consola, lo que es ideal para sistemas de logging centralizados como ELK o Splunk -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"service":"${springAppName}"}</customFields>
+        </encoder>
+    </appender>
+
+
+    <root level="INFO">
+        <appender-ref ref="JSON_CONSOLE"/>
+    </root>
+</configuration>

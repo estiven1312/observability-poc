@@ -1,0 +1,23 @@
+services:
+  postgres:
+    labels:
+      com.docker.compose.service: "accountable-service"
+    image: postgres:16-alpine
+    container_name: accountable-postgres
+    environment:
+      POSTGRES_DB: accountable_db
+      POSTGRES_USER: accountable_user
+      POSTGRES_PASSWORD: accountable_pass
+    ports:
+      - "5436:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U accountable_user -d accountable_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init/01-init-accountable.sql:/docker-entrypoint-initdb.d/01-init-accountable.sql:ro
+
+volumes:
+  postgres_data:

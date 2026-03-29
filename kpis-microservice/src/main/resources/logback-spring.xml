@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProfile name="local">
+        <include resource="logback/logback-local.xml"/>
+    </springProfile>
+    <springProfile name="docker">
+        <include resource="logback/logback-docker.xml"/>
+    </springProfile>
+    <springProfile name="!local &amp; !docker">
+        <include resource="logback/logback-structured.xml"/>
+    </springProfile>
+</configuration>

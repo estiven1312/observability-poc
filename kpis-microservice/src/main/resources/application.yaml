@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: kpis-microservice
+  datasource:
+    url: jdbc:postgresql://localhost:6432/kpisdb
+    username: kpis_user
+    password: kpis_pass
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+rest-client:
+  kpis-service:
+    url: http://accountable-service:9095
+  sales-service:
+    url: http://sales-service:9096
+
+logging:
+  logstash:
+    host: ${LOGSTASH_HOST:localhost}
+    port: ${LOGSTASH_PORT:5000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+  metrics:
+    web:
+      server:
+        request:
+          distribution:
+            percentiles-histogram:
+              http:
+                server:
+                  requests: true
+            percentiles:
+              http:
+                server:
+                  requests: 0.5,0.95,0.99
+              slo:
+                http:
+                  server:
+                  requests:
+                    - 500ms
+                    - 1s
+                    - 2s
+                    - 5s
+                    - 10s
+    tags:
+      application: ${spring.application.name}

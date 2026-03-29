@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: accountable-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5436/accountable_db}
+    username: ${SPRING_DATASOURCE_USERNAME:accountable_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:accountable_pass}
+  sql:
+    init:
+      mode: never
+
+server:
+  port: 9095

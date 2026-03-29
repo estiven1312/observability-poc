@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <appender name="LOG_APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- Configuración de loggers específicos -->
+    <!-- En este caso, se establece un logger para la clase KpiService con nivel INFO -->
+    <!-- Por que usar additivity="false"? Para evitar que los logs de esta clase se propaguen al root logger y se dupliquen en la salida JSON -->
+    <logger name="pe.com.peruapps.kpismicroservice.KpiService" level="INFO" additivity="false">
+        <appender-ref ref="LOG_APP"/>
+    </logger>
+
+
+    <logger name="org.springframework" level="WARN"/>
+</configuration>

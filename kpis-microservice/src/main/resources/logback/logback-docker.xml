@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <springProperty name="springAppName" source="spring.application.name"/>
+    <springProperty name="logstashHost" source="logging.logstash.host" defaultValue="logstash"/>
+    <springProperty name="logstashPort" source="logging.logstash.port" defaultValue="5000"/>
+
+    <appender name="LOGSTASH_TCP" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${logstashHost}:${logstashPort}</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"service":"${springAppName}"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- Configuracion global: toda la app envia a Logstash y deja rastro en consola -->
+    <root level="INFO">
+        <appender-ref ref="LOGSTASH_TCP"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.hibernate" level="WARN"/>
+</configuration>
+

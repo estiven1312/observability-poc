@@ -1,0 +1,50 @@
+CREATE TABLE IF NOT EXISTS users (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  email VARCHAR(160) NOT NULL UNIQUE
+);
+
+INSERT INTO users (name, email)
+VALUES
+  ('Usuario 01', 'usuario01@demo.local'),
+  ('Usuario 02', 'usuario02@demo.local'),
+  ('Usuario 03', 'usuario03@demo.local'),
+  ('Usuario 04', 'usuario04@demo.local'),
+  ('Usuario 05', 'usuario05@demo.local'),
+  ('Usuario 06', 'usuario06@demo.local'),
+  ('Usuario 07', 'usuario07@demo.local'),
+  ('Usuario 08', 'usuario08@demo.local'),
+  ('Usuario 09', 'usuario09@demo.local'),
+  ('Usuario 10', 'usuario10@demo.local'),
+  ('Usuario 11', 'usuario11@demo.local'),
+  ('Usuario 12', 'usuario12@demo.local'),
+  ('Usuario 13', 'usuario13@demo.local'),
+  ('Usuario 14', 'usuario14@demo.local'),
+  ('Usuario 15', 'usuario15@demo.local'),
+  ('Usuario 16', 'usuario16@demo.local'),
+  ('Usuario 17', 'usuario17@demo.local'),
+  ('Usuario 18', 'usuario18@demo.local'),
+  ('Usuario 19', 'usuario19@demo.local'),
+  ('Usuario 20', 'usuario20@demo.local'),
+  ('Usuario 21', 'usuario21@demo.local'),
+  ('Usuario 22', 'usuario22@demo.local'),
+  ('Usuario 23', 'usuario23@demo.local'),
+  ('Usuario 24', 'usuario24@demo.local'),
+  ('Usuario 25', 'usuario25@demo.local'),
+  ('Usuario 26', 'usuario26@demo.local'),
+  ('Usuario 27', 'usuario27@demo.local'),
+  ('Usuario 28', 'usuario28@demo.local'),
+  ('Usuario 29', 'usuario29@demo.local'),
+  ('Usuario 30', 'usuario30@demo.local'),
+  ('Usuario 31', 'usuario31@demo.local'),
+  ('Usuario 32', 'usuario32@demo.local'),
+  ('Usuario 33', 'usuario33@demo.local'),
+  ('Usuario 34', 'usuario34@demo.local'),
+  ('Usuario 35', 'usuario35@demo.local'),
+  ('Usuario 36', 'usuario36@demo.local'),
+  ('Usuario 37', 'usuario37@demo.local'),
+  ('Usuario 38', 'usuario38@demo.local'),
+  ('Usuario 39', 'usuario39@demo.local'),
+  ('Usuario 40', 'usuario40@demo.local')
+ON CONFLICT (email) DO NOTHING;
+
