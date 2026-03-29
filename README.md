@@ -176,7 +176,7 @@ public KpiResponse buildKpis(KpiRequest request) {
 ### Por qué usar MDC?
 
 1. **Trazabilidad**: Cada log incluye el usuario que ejecutó la solicitud
-2. **Correlación**: Facilita追踪 requests en Kibana
+2. **Correlación**: Facilita requests en Kibana
 3. **Contexto automático**: El `LogstashEncoder` incluye las variables MDC en el JSON de forma automática
 
 ### Ejemplo de log generado
